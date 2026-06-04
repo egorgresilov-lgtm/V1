@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Байкал — карта достопримечательностей</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #app { height: 100%; display: grid; grid-template-columns: 360px 1fr; }
+    #sidebar { padding: 12px 12px 8px; overflow: auto; border-right: 1px solid #e6e6e6; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #map { height: 100%; }
+    h1 { font-size: 18px; margin: 0 0 10px; }
+    .muted { color: #666; font-size: 12px; line-height: 1.35; }
+    .legend { display: grid; grid-template-columns: 18px 1fr; gap: 6px 10px; margin: 10px 0 12px; align-items: center; }
+    .dot { width: 12px; height: 12px; border-radius: 999px; display: inline-block; border: 1px solid rgba(0,0,0,.25); }
+    .section { margin-top: 12px; }
+    .section-title { font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+    ul { margin: 6px 0 0 18px; padding: 0; }
+    li { margin: 4px 0; font-size: 13px; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background: #f6f6f6; border: 1px solid #e3e3e3; border-radius: 6px; padding: 0 6px; }
+    @media (max-width: 900px) {
+      #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      #sidebar { border-right: none; border-bottom: 1px solid #e6e6e6; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar">
+      <h1>Байкал — метки достопримечательностей</h1>
+      <div class="muted" id="buildInfo" style="margin:-6px 0 8px;"></div>
+      <div class="muted">
+        Откройте метку и нажмите <span class="kbd">Показать</span> в попапе, чтобы приблизить карту к месту.
+        Слои можно включать/выключать через переключатель справа (иконка слоёв).
+      </div>
+
+      <div class="legend" id="legend"></div>
+
+      <div class="section">
+        <div class="section-title">Места без точных координат (в исходном списке)</div>
+        <ul>
+          <li>Сарминское ущелье</li>
+          <li>Водопад Кынгарга (расположен в Тункинском районе)</li>
+          <li>Гарга (долина реки Гарга, Курумканский район)</li>
+          <li>Ацагат (деревня поэтов и лам, Заиграевский район)</li>
+        </ul>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    const BUILD = "2026-05-25  (исправление координат #2)";
+
+    const categories = [
+      { id: "baikal", name: "Байкал", color: "#1f77b4" },
+      { id: "power", name: "Места силы и природы", color: "#2ca02c" },
+      { id: "thermal", name: "Термальные источники", color: "#d62728" },
+      { id: "ulan", name: "Улан-Удэ и сёла", color: "#9467bd" },
+      { id: "ethno", name: "Этнокомплексы", color: "#8c564b" },
+      { id: "active", name: "Активный отдых", color: "#ff7f0e" },
+    ];
+
+    const buildInfo = document.getElementById("buildInfo");
+    if (buildInfo) buildInfo.textContent = "Версия: " + BUILD;
+
+    const legendEl = document.getElementById("legend");
+    for (const c of categories) {
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = c.color;
+      const label = document.createElement("div");
+      label.textContent = c.name;
+      legendEl.appendChild(dot);
+      legendEl.appendChild(label);
+    }
+
+    const map = L.map("map", { zoomControl: true });
+
+    const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+
+    const overlays = {};
+    for (const c of categories) overlays[c.name] = L.layerGroup().addTo(map);
+
+    function colorByCategoryId(catId) {
+      const found = categories.find(c => c.id === catId);
+      return found ? found.color : "#3388ff";
+    }
+
+    function addPlace(p) {
+      const color = colorByCategoryId(p.category);
+      const marker = L.circleMarker([p.lat, p.lon], {
+        radius: 7,
+        color: "rgba(0,0,0,.35)",
+        weight: 1,
+        fillColor: color,
+        fillOpacity: 0.95,
+      });
+
+      const coord = `${p.lat.toFixed(6)}, ${p.lon.toFixed(6)}`;
+      const note = p.note ? `<div style="margin-top:6px;color:#555;font-size:12px;">${escapeHtml(p.note)}</div>` : "";
+      const original = p.original ? `<div style="margin-top:6px;color:#555;font-size:12px;">Исходные координаты: ${escapeHtml(p.original)}</div>` : "";
+      const debug =
+        (p.latText && p.lonText)
+          ? `<div style="margin-top:6px;color:#666;font-size:11px;">Парсинг: ${escapeHtml(p.latText)}; ${escapeHtml(p.lonText)} → ${escapeHtml(coord)}</div>`
+          : "";
+
+      const links =
+        `<div style="margin-top:10px;font-size:12px;">
+          <a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lon}#map=12/${p.lat}/${p.lon}" target="_blank" rel="noreferrer">Открыть в OSM</a>
+          <span style="color:#999;"> · </span>
+          <a href="https://www.google.com/maps?q=${p.lat},${p.lon}" target="_blank" rel="noreferrer">Открыть в Google</a>
+        </div>`;
+      const uid = Math.random().toString(16).slice(2);
+      const btnId = "btn_" + uid;
+      const miniId = "mini_" + uid;
+
+      marker.bindPopup(
+        `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.25;">
+          <div style="font-weight:700;margin-bottom:6px;">${escapeHtml(p.name)}</div>
+          <div style="font-size:12px;color:#333;">${escapeHtml(coord)}</div>
+          ${original}
+          ${note}
+          ${debug}
+          ${links}
+          <div style="margin-top:10px;font-size:12px;color:#333;font-weight:600;">Метка по координатам</div>
+          <div id="${miniId}" style="height:140px;width:240px;margin-top:6px;border-radius:10px;overflow:hidden;border:1px solid #ddd;"></div>
+          <div style="margin-top:10px;">
+            <button id="${btnId}" style="cursor:pointer;border:1px solid #ddd;background:#fff;border-radius:8px;padding:6px 10px;">Показать</button>
+          </div>
+        </div>`
+      );
+
+      marker.on("popupopen", () => {
+        const btn = document.getElementById(btnId);
+        if (btn) btn.onclick = () => map.setView([p.lat, p.lon], Math.max(map.getZoom(), 11), { animate: true });
+
+        // Мини-карта в попапе с меткой по координатам
+        const miniEl = document.getElementById(miniId);
+        if (!miniEl) return;
+
+        // Leaflet в попапах иногда требует invalidateSize после отображения
+        const ensureView = (miniMap) => {
+          miniMap.invalidateSize(true);
+          miniMap.setView([p.lat, p.lon], 13, { animate: false });
+        };
+
+        if (!miniEl.dataset.inited) {
+          miniEl.dataset.inited = "1";
+          const miniMap = L.map(miniEl, {
+            attributionControl: false,
+            zoomControl: false,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            tap: false,
+          });
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(miniMap);
+          // Яркая точка + пин, чтобы было очевидно, где координата
+          L.circleMarker([p.lat, p.lon], { radius: 6, color: "#b10000", weight: 2, fillColor: "#ff0000", fillOpacity: 0.9 }).addTo(miniMap);
+          L.marker([p.lat, p.lon]).addTo(miniMap);
+          miniEl._miniMap = miniMap;
+          ensureView(miniMap);
+          setTimeout(() => ensureView(miniMap), 50);
+        } else if (miniEl._miniMap) {
+          ensureView(miniEl._miniMap);
+          setTimeout(() => ensureView(miniEl._miniMap), 50);
+        }
+      });
+
+      const layerName = categories.find(c => c.id === p.category)?.name || "Прочее";
+      marker.addTo(overlays[layerName] || overlays[categories[0].name]);
+      return marker;
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // Парсинг координат из формата "53°43′06″" / "54°42.082′" / "53°51′"
+    function parseDmsToDecimal(input) {
+      // Варианты: ° ′ ″ или обычные ' "
+      // Примеры: 53°43′06″ ; 54°42.082′ ; 53°51′ ; 51°54′12.3″
+      const s = String(input).trim().replaceAll(",", ".")
+        .replaceAll("′", "'").replaceAll("’", "'")
+        .replaceAll("″", '"').replaceAll("”", '"');
+
+      const re = /^(\d+(?:\.\d+)?)\s*°\s*(?:(\d+(?:\.\d+)?)\s*['′]?\s*)?(?:(\d+(?:\.\d+)?)\s*["″]?\s*)?$/;
+      const m = s.match(re);
+      if (!m) throw new Error("Не удалось разобрать координату: " + input);
+      const deg = parseFloat(m[1]);
+      const min = m[2] != null ? parseFloat(m[2]) : 0;
+      const sec = m[3] != null ? parseFloat(m[3]) : 0;
+      return deg + (min / 60) + (sec / 3600);
+    }
+
+    // Данные (координаты берём из исходных строк — так точнее и без ручных ошибок)
+    const places = [
+      // Байкал
+      { name: "Чивыркуйский залив", latText: "53°43′06″", lonText: "109°06′51″", category: "baikal", original: "53°43′06″ с.ш., 109°06′51″ в.д." },
+      { name: "Ушканьи острова", latText: "53°51′", lonText: "108°37′", category: "baikal", note: "Координаты приблизительные.", original: "≈ 53°51′ с.ш., 108°37′ в.д." },
+      { name: "Полуостров Святой Нос", latText: "53°40′", lonText: "108°50′", category: "baikal", original: "53°40′ с.ш., 108°50′ в.д." },
+      { name: "Бухта Песчаная", latText: "52°15′28″", lonText: "105°42′15″", category: "baikal", original: "52°15′28″ с.ш., 105°42′15″ в.д." },
+      { name: "Бухта Аяя", latText: "52°47′23″", lonText: "106°36′35″", category: "baikal", original: "52°47′23″ с.ш., 106°36′35″ в.д." },
+      { name: "Озеро Фролиха", latText: "55°26′", lonText: "110°02′", category: "baikal", original: "55°26′ с.ш., 110°02′ в.д." },
+      { name: "Энхалук (посёлок)", latText: "52°28′53″", lonText: "106°58′25″", category: "baikal", original: "52°28′53″ с.ш., 106°58′25″ в.д." },
+      { name: "Горячинск (курорт)", latText: "52°59′", lonText: "108°18′", category: "baikal", note: "Координаты приблизительные (по селу).", original: "≈ 52°59′ с.ш., 108°18′ в.д." },
+      { name: "Байкальский биосферный заповедник", latText: "51°20′36″", lonText: "105°09′27″", category: "baikal", original: "51°20′36″ с.ш., 105°09′27″ в.д." },
+      { name: "Баргузинский заповедник", latText: "54°30′", lonText: "109°50′", category: "baikal", original: "54°30′ с.ш., 109°50′ в.д." },
+      { name: "Забайкальский национальный парк", latText: "53°43′", lonText: "109°13′", category: "baikal", original: "53°43′ с.ш., 109°13′ в.д." },
+      { name: "Фролихинский заказник", latText: "55°30′", lonText: "110°20′", category: "baikal", note: "Точка по центру указанного диапазона широт (55°28′—55°32′).", original: "≈ 55°28′—55°32′ с.ш., 110°20′ в.д." },
+      { name: "Большая Байкальская тропа (участок Большие Коты — Листвянка, старт)", latText: "51°54′12.3″", lonText: "105°04′20.0″", category: "baikal", note: "Пример координат (старт участка).", original: "51°54′12.3″ с.ш., 105°04′20.0″ в.д." },
+
+      // Места силы и природы
+      { name: "Иволгинский дацан", latText: "51°45′30″", lonText: "107°12′12″", category: "power", original: "51°45′30″ с.ш., 107°12′12″ в.д." },
+      { name: "Ринпоче Багша (статуя Будды)", latText: "51°51′55.75″", lonText: "107°35′38.876″", category: "power", original: "51°51′55.75″ с.ш., 107°35′38.876″ в.д." },
+      { name: "Дацан Богини Янжимы (район села Ярикта)", latText: "54°15′", lonText: "110°30′", category: "power", note: "Координаты приблизительные.", original: "≈ 54°15′ с.ш., 110°30′ в.д." },
+      { name: "Баргузинская долина", latText: "53°45′", lonText: "110°00′", category: "power", note: "Общие (приблизительные) координаты.", original: "≈ 53°45′ с.ш., 110°00′ в.д." },
+      { name: "Тункинская долина", latText: "51°30′", lonText: "103°30′", category: "power", note: "Общие (приблизительные) координаты.", original: "≈ 51°30′ с.ш., 103°30′ в.д." },
+      { name: "Долина потухших вулканов (Падь Хи-Гол)", latText: "52°42′14″", lonText: "99°01′16″", category: "power", original: "52°42′14″ с.ш., 99°01′16″ в.д." },
+      { name: "Пик Мунку-Сардык", latText: "51°45′", lonText: "100°30′", category: "power", original: "51°45′ с.ш., 100°30′ в.д." },
+      { name: "Гора Мамай", latText: "51°23′15″", lonText: "104°48′26″", category: "power", original: "51°23′15″ с.ш., 104°48′26″ в.д." },
+      { name: "Водопад Малый Жом-Болок", latText: "52°45′54″", lonText: "99°44′48″", category: "power", original: "52°45′54″ с.ш., 99°44′48″ в.д." },
+      { name: "Аршан (посёлок)", latText: "51°54′31″", lonText: "102°25′44″", category: "power", original: "51°54′31″ с.ш., 102°25′44″ в.д." },
+      { name: "Нилова Пустынь (посёлок)", latText: "51°41′39.3468″", lonText: "101°40′24.852″", category: "power", original: "51°41′39.3468″ с.ш., 101°40′24.852″ в.д." },
+      { name: "Шумакские источники", latText: "51°58′", lonText: "101°52′", category: "power", note: "Координаты приблизительные.", original: "≈ 51°58′ с.ш., 101°52′ в.д." },
+
+      // Термальные источники
+      { name: "Кучигер (район улуса Кучигер)", latText: "54°40′", lonText: "110°15′", category: "thermal", note: "Координаты приблизительные.", original: "≈ 54°40′ с.ш., 110°15′ в.д." },
+      { name: "Алла", latText: "54°42.082′", lonText: "110°42.355′", category: "thermal", original: "54°42.082′ с.ш., 110°42.355′ в.д." },
+      { name: "Дзелинда", latText: "55°58′03″", lonText: "110°31′37″", category: "thermal", original: "55°58′03″ с.ш., 110°31′37″ в.д." },
+      { name: "Гоуджекит", latText: "55°43′12″", lonText: "108°56′56″", category: "thermal", original: "55°43′12″ с.ш., 108°56′56″ в.д." },
+      { name: "Баунт (озеро Баунт)", latText: "55°10′", lonText: "113°00′", category: "thermal", note: "Координаты приблизительные.", original: "≈ 55°10′ с.ш., 113°00′ в.д." },
+      { name: "Ильинка (Питателевский источник)", latText: "52°07′10″", lonText: "107°16′16″", category: "thermal", note: "Координаты приблизительные.", original: "≈ 52°07′10″ с.ш., 107°16′16″ в.д." },
+
+      // Улан-Удэ и сёла
+      { name: "Памятник Ленину (Голова)", latText: "51°50′05″", lonText: "107°35′06″", category: "ulan", original: "51°50′05″ с.ш., 107°35′06″ в.д." },
+      { name: "Площадь Советов", latText: "51°50′05″", lonText: "107°35′06″", category: "ulan", original: "51°50′05″ с.ш., 107°35′06″ в.д." },
+      { name: "Театр оперы и балета", latText: "51°49′58.0008″", lonText: "107°34′59.0016″", category: "ulan", original: "51°49′58.0008″ с.ш., 107°34′59.0016″ в.д." },
+      { name: "Музей истории Улан-Удэ", latText: "51°49′39.5″", lonText: "107°35′05.6″", category: "ulan", original: "51°49′39.5″ с.ш., 107°35′05.6″ в.д." },
+      { name: "Центр современного искусства «Залуу»", latText: "51°49′59.88″", lonText: "107°35′02.04″", category: "ulan", original: "51°49′59.88″ с.ш., 107°35′02.04″ в.д." },
+      { name: "Этнографический музей народов Забайкалья", latText: "51°53′09.8″", lonText: "107°38′57.6″", category: "ulan", original: "51°53′09.8″ с.ш., 107°38′57.6″ в.д." },
+      { name: "Село Бичура", latText: "50°35′11″", lonText: "107°35′51″", category: "ulan", original: "50°35′11″ с.ш., 107°35′51″ в.д." },
+      { name: "Село Тарбагатай", latText: "51°28′49.2636″", lonText: "107°22′23.8404″", category: "ulan", original: "51°28′49.2636″ с.ш., 107°22′23.8404″ в.д." },
+      { name: "Одигитриевский собор", latText: "51°49′21″", lonText: "107°35′05″", category: "ulan", original: "51°49′21″ с.ш., 107°35′05″ в.д." },
+      { name: "Спасо-Преображенская церковь (с. Посольское)", latText: "52°01′04″", lonText: "106°10′42″", category: "ulan", original: "52°01′04″ с.ш., 106°10′42″ в.д." },
+      { name: "Покровская церковь (центр с. Тарбагатай)", latText: "51°28′55″", lonText: "107°21′41″", category: "ulan", note: "Координаты церкви не найдены — точка по центру села.", original: "51°28′55″ с.ш., 107°21′41″ в.д." },
+
+      // Этнокомплексы
+      { name: "«Степной кочевник» (с. Нарын-Ацагат)", latText: "52°00′10.62″", lonText: "108°17′22.236″", category: "ethno", original: "52°00′10.62″ с.ш., 108°17′22.236″ в.д." },
+
+      // Активный отдых
+      { name: "Горные лыжи и фрирайд (гора Мамай)", latText: "51°23′15″", lonText: "104°48′26″", category: "active", original: "51°23′15″ с.ш., 104°48′26″ в.д." },
+      { name: "Рафтинг на реке Жом-Болок (приблизительно)", latText: "52°45′", lonText: "99°48′", category: "active", note: "Точка ориентировочная (русло реки).", original: "≈ 52°45′ с.ш., 99°48′ в.д." },
+    ];
+
+    const markers = [];
+    for (const p of places) {
+      // Внутренние численные координаты рассчитываем из строк
+      const lat = parseDmsToDecimal(p.latText);
+      const lon = parseDmsToDecimal(p.lonText);
+      markers.push(addPlace({ ...p, lat, lon }));
+    }
+
+    const overlayControl = L.control.layers({ "OpenStreetMap": osm }, overlays, { collapsed: true }).addTo(map);
+
+    // Подогнать карту под все маркеры
+    const allLatLng = markers.map(m => m.getLatLng());
+    const bounds = L.latLngBounds(allLatLng);
+    map.fitBounds(bounds.pad(0.12));
+  </script>
+</body>
+</html>

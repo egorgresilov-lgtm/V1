@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бурятия - Дух Места | Туризм в сердце Сибири</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- OpenLayers CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.2.4/ol.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="#hero">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#about">О Бурятии</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html">Маршруты</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html">Туры сообщества</a></li>
+                <li><a href="traditions.html">Традиции</a></li>
+                <li><a href="gastronomy.html">Гастротуризм</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="ornament-border"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Бурятия</span>
+                <span class="title-subtitle">Дух Места</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Откройте для себя жемчужину Дальнего Востока</p>
+            <div class="hero-buttons fade-in-delay-2">
+                <a href="attractions.html" class="btn btn-primary">Достопримечательности</a>
+                <a href="routes.html" class="btn btn-secondary">Маршруты</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>↓</span>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="ornament">❋</span>
+                О Бурятии
+                <span class="ornament">❋</span>
+            </h2>
+            <div class="about-grid">
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/attractions/Степной кочевник.jpg" alt="Природа" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Природа</h3>
+                        <p>Байкал, степи, горы и леса — уникальное разнообразие ландшафтов</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/attractions/Иволгинский дацан.jpg" alt="Буддизм" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Буддизм</h3>
+                        <p>Древние дацаны, духовные практики и философия сострадания</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/traditions/шаманский.jpg" alt="Шаманизм" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Шаманизм</h3>
+                        <p>Связь с духами природы, священные места и обряды</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="https://images.unsplash.com/photo-1771884078061-e099faacf85d?auto=format&fit=crop&w=600&q=80" alt="Ёхор" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Культура</h3>
+                        <p>Традиции, язык, музыка и танцы бурятского народа</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Traditions Section -->
+    <section id="traditions" class="traditions section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="ornament">❁</span>
+                Традиции и Культура
+                <span class="ornament">❁</span>
+            </h2>
+            
+            <div class="traditions-grid">
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/traditions/бухлер.jpg" alt="Бурятская кухня" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Национальная кухня</h3>
+                        <p>Позы, буузы, саламат — вкус настоящих бурятских традиций</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/traditions/сагалгаан.jpg" alt="Сагаалган" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Сагаалган</h3>
+                        <p>Праздник Белого месяца — бурятский Новый год по лунному календарю</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="https://images.unsplash.com/photo-1745155541534-0b611f491762?auto=format&fit=crop&w=1200&q=80" alt="Юрта" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Юрта</h3>
+                        <p>Традиционное жилище кочевников, символ домашнего очага</p>
+                    </div>
+                </div>
+                <div class="tradition-card scroll-reveal">
+                    <div class="tradition-header">
+                        <img src="images/traditions/вышивка.jpeg" alt="Орнамент" class="tradition-image">
+                    </div>
+                    <div class="card-content">
+                        <h3>Орнамент</h3>
+                        <p>Древние узоры с глубоким символическим значением</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Random Fact -->
+            <div class="random-fact scroll-reveal">
+                <div class="fact-box">
+                    <h4>Знаете ли вы?</h4>
+                    <p id="randomFactText">Загрузка интересного факта...</p>
+                    <button class="btn btn-small" id="newFactBtn">Новый факт</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map" class="section" style="padding: 80px 0; background: var(--bg-secondary);">
+        <div class="container">
+            <h2 class="section-title">Мы на карте</h2>
+            <p class="section-subtitle">Исследуйте Бурятию на интерактивной карте</p>
+            <div id="map2gisMain" style="width: 100%; height: 500px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); margin-top: 40px;"></div>
+        </div>
+    </section>
+
+    <!-- Routes Section (same cards as routes.html) -->
+    <section id="tours" class="tours section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="ornament">◎</span>
+                Маршруты
+                <span class="ornament">◎</span>
+            </h2>
+            <p class="intro-text" style="text-align: center; max-width: 720px; margin: 0 auto 2rem; color: var(--text-secondary);">
+                Выберите формат путешествия: от аутентичной деревенской Бурятии до активного маршрута с трекингом и рафтингом.
+            </p>
+            <div class="routes-tour-grid" id="routesTourGrid"></div>
+            <p class="routes-section-cta">
+                <a href="routes.html" class="btn routes-all-btn">Все маршруты на отдельной странице</a>
+            </p>
+        </div>
+    </section>
+
+    <div id="routesTourOverlay" class="routes-tour-overlay" aria-hidden="true">
+        <div class="routes-tour-detail" id="routesTourDetail" role="dialog" aria-modal="true" aria-label="Детали маршрута">
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="reviews section">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="ornament">★</span>
+                Отзывы путешественников
+                <span class="ornament">★</span>
+            </h2>
+            <div class="reviews-grid" id="reviewsGrid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact/Footer Section -->
+    <footer id="contact" class="footer">
+        <div class="ornament-pattern"></div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Байгал далай — манай эрдэни"</p>
+                        <cite>— Байкал — наше сокровище</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- OpenLayers JS -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.2.4/dist/ol.js"></script>
+    <script src="script.js?v=7"></script>
+    <script src="routes.js?v=14"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>

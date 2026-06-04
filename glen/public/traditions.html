@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Традиции и Культура — Бурятия Tourism</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="index.html#hero">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about">О Бурятии</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html">Маршруты</a></li>
+                <li><a href="traditions.html" class="active">Традиции</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html">Туры сообщества</a></li>
+                <li><a href="gastronomy.html">Гастротуризм</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="page-hero traditions-hero">
+        <div class="hero-overlay"></div>
+        <div class="ornament-border"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Традиции и Культура</span>
+                <span class="title-subtitle">Дух кочевого народа</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Древние обряды, живое наследие и тысячелетние традиции Бурятии</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container traditions-page">
+        <!-- Statistics -->
+        <section class="traditions-stats scroll-reveal">
+            <div class="stat-card">
+                <div class="stat-number" id="traditionCount">0</div>
+                <div class="stat-label">Традиций</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="ceremonyCount">0</div>
+                <div class="stat-label">Обрядов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="craftCount">0</div>
+                <div class="stat-label">Ремёсел</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3000+</div>
+                <div class="stat-label">Лет истории</div>
+            </div>
+        </section>
+
+        <!-- Traditions Grid -->
+        <section class="traditions-grid-section">
+            <h2 class="section-title">
+                <span class="ornament">❁</span>
+                Традиции Бурятии
+                <span class="ornament">❁</span>
+            </h2>
+            <div id="traditionsGrid" class="traditions-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Crafts Section -->
+        <section class="crafts-section">
+            <h2 class="section-title">
+                <span class="ornament">◎</span>
+                Народные Ремёсла
+                <span class="ornament">◎</span>
+            </h2>
+            <div id="craftsGrid" class="crafts-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Ceremonies Section -->
+        <section class="ceremonies-section">
+            <h2 class="section-title">
+                <span class="ornament">★</span>
+                Обряды и Праздники
+                <span class="ornament">★</span>
+            </h2>
+            <div id="ceremoniesGrid" class="ceremonies-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Festivals & Events Section -->
+        <section class="festivals-section">
+            <h2 class="section-title">
+                <span class="ornament">🎉</span>
+                Фестивали и События
+                <span class="ornament">🎉</span>
+            </h2>
+            <div id="festivalsGrid" class="festivals-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Байгал далай — манай эрдэни"</p>
+                        <cite>— Байкал — наше сокровище</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="traditionModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body" id="modalBody">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="traditions.js?v=3"></script>
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+        }
+        
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // Sound toggle
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar && window.scrollY > 50) {
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.15)';
+            } else if (navbar) {
+                navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+        });
+    </script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>

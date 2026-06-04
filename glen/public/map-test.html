@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a5276;
+        }
+        #map {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+            border-radius: 8px;
+            background: #e0e0e0;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Google Maps Test Page</h1>
+        
+        <div id="status"></div>
+        
+        <div>
+            <button onclick="loadMap()">🔄 Загрузить карту</button>
+            <button onclick="checkAPI()">🔍 Проверить API Key</button>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div id="log" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `status ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+            console.log(message);
+        }
+
+        async function checkAPI() {
+            try {
+                addLog('Fetching API config...', 'info');
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                addLog(`Google Maps API Key: ${config.googleMapsApiKey ? config.googleMapsApiKey.substring(0, 10) + '...' : 'MISSING'}`, 
+                       config.googleMapsApiKey ? 'success' : 'error');
+                
+                return config.googleMapsApiKey;
+            } catch (error) {
+                addLog(`Error fetching config: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function loadMap() {
+            const mapDiv = document.getElementById('map');
+            mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">Loading map...</div>';
+            
+            const apiKey = await checkAPI();
+            
+            if (!apiKey) {
+                mapDiv.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: red;">❌ API Key not found!</div>';
+                return;
+            }
+            
+            addLog('Loading Google Maps API...', 'info');
+            
+            // Remove existing script if any
+            const existingScript = document.getElementById('googleMapsScript');
+            if (existingScript) {
+                existingScript.remove();
+            }
+            
+            // Clear google maps cache for testing
+            window.google = undefined;
+            
+            // Load Google Maps API
+            const script = document.createElement('script');
+            script.id = 'googleMapsScript';
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&language=ru&callback=initTestMap`;
+            script.async = true;
+            script.defer = true;
+            
+            script.onload = () => {
+                addLog('✓ Google Maps API script loaded', 'success');
+            };
+            
+            script.onerror = (error) => {
+                addLog(`✗ Failed to load Google Maps API script`, 'error');
+                addLog(`Error details: ${error.message || error}`, 'error');
+                addLog('⚠ Possible reasons: Invalid API key, API not enabled, billing not set up', 'error');
+                mapDiv.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px;">
+                        <div style="color: red; font-size: 48px; margin-bottom: 20px;">❌</div>
+                        <div style="color: red; font-size: 18px; font-weight: bold; margin-bottom: 10px;">Failed to load Google Maps</div>
+                        <div style="color: #666; font-size: 14px; text-align: center; max-width: 500px;">
+                            <p><strong>API Key:</strong> ${apiKey.substring(0, 15)}...</p>
+                            <p><strong>Possible issues:</strong></p>
+                            <ul style="text-align: left;">
+                                <li>API key is invalid or incorrect format</li>
+                                <li>Maps JavaScript API is not enabled in Google Cloud Console</li>
+                                <li>Billing is not enabled</li>
+                                <li>API key has restrictions that block this request</li>
+                            </ul>
+                            <p><strong>Solution:</strong> Get a valid Google Maps API key from <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a></p>
+                        </div>
+                    </div>
+                `;
+            };
+            
+            document.head.appendChild(script);
+        }
+
+        window.initTestMap = function() {
+            try {
+                addLog('Initializing map...', 'info');
+                
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 52.2870, lng: 107.2711 },
+                    zoom: 6,
+                    mapTypeId: 'roadmap'
+                });
+                
+                addLog('✓ Map initialized successfully!', 'success');
+                
+                // Add a test marker
+                const marker = new google.maps.Marker({
+                    position: { lat: 52.2870, lng: 107.2711 },
+                    map: map,
+                    title: 'Улан-Удэ',
+                    animation: google.maps.Animation.DROP
+                });
+                
+                const infoWindow = new google.maps.InfoWindow({
+                    content: '<h3>Улан-Удэ</h3><p>Столица Бурятии</p>'
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+                
+                addLog('✓ Test marker added', 'success');
+                
+            } catch (error) {
+                addLog(`✗ Error initializing map: ${error.message}`, 'error');
+                console.error('Map error:', error);
+            }
+        };
+
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('Page loaded. Click "Загрузить карту" to test Google Maps.', 'info');
+        });
+    </script>
+</body>
+</html>

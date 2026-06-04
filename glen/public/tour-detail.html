@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тур — Бурятия. Дух места</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #f6f8fb;
+        --card: #ffffff;
+        --primary: #1a4d5a;
+        --gold: #d4a537;
+        --muted: #6b7b86;
+        --line: #e8eef2;
+        --shadow: 0 12px 30px rgba(26, 77, 90, 0.15);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+        background: #ffffff !important;
+        color: #122127;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: transparent;
+        opacity: 1;
+      }
+
+      .page {
+        position: relative;
+        min-height: auto;
+        margin-top: 60px;
+        padding: 32px 16px 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .tc-back {
+        display: none;
+      }
+
+      .td-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 60px);
+        margin-top: 60px;
+        color: var(--muted);
+      }
+
+      .td-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--line);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: tdSpin 0.8s linear infinite;
+        margin-bottom: 1rem;
+      }
+
+      @keyframes tdSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .tour-card {
+        display: none;
+      }
+
+      .tour-card:hover {
+      }
+
+      .tc-top {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 22px;
+        padding: 20px;
+        border-bottom: 1px solid var(--line);
+        background:
+          linear-gradient(180deg, rgba(26, 77, 90, 0.03), transparent 60%),
+          radial-gradient(
+            circle at 8% 0%,
+            rgba(212, 165, 55, 0.08),
+            transparent 40%
+          );
+      }
+
+      .tc-title {
+        font-family: "Playfair Display", serif;
+        color: var(--primary);
+        font-size: clamp(20px, 3vw, 28px);
+        line-height: 1.2;
+        margin: 0 0 10px;
+      }
+
+      .tc-thumb-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        align-content: start;
+      }
+
+      .tc-thumb {
+        height: 112px;
+        border-radius: 14px;
+        border: 1px solid rgba(26, 77, 90, 0.1);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .tc-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        filter: saturate(1.05);
+      }
+
+      .tc-thumb::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0) 40%,
+          rgba(0, 0, 0, 0.18)
+        );
+        opacity: 0.8;
+      }
+
+      .tc-main-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding-top: 2px;
+      }
+
+      .tc-icons {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .tc-icon {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 10px 12px;
+        background: linear-gradient(180deg, rgba(26, 77, 90, 0.04), transparent);
+      }
+
+      .tc-icon .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .tc-icon .value {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: #12343c;
+      }
+
+      .tc-icon svg {
+        width: 18px;
+        height: 18px;
+        color: var(--primary);
+        flex-shrink: 0;
+      }
+
+      .tc-price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 14px;
+      }
+
+      .tc-price {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .tc-price .now {
+        font-family: "Playfair Display", serif;
+        font-size: 28px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .tc-price .old {
+        color: var(--muted);
+        text-decoration: line-through;
+        font-weight: 500;
+      }
+
+      .tc-book-btn {
+        border: 2px solid var(--gold);
+        background: transparent;
+        color: var(--gold);
+        font-weight: 600;
+        padding: 12px 18px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+        white-space: nowrap;
+      }
+
+      .tc-book-btn:hover {
+        background: var(--gold);
+        color: white;
+        transform: translateY(-1px);
+      }
+
+      .tc-book-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .tc-middle {
+        padding: 18px 20px;
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .tc-mini-map {
+        border-radius: 16px;
+        border: 1px dashed rgba(26, 77, 90, 0.25);
+        background:
+          linear-gradient(180deg, rgba(26, 77, 90, 0.05), transparent),
+          radial-gradient(
+            circle at 15% 20%,
+            rgba(212, 165, 55, 0.18),
+            transparent 38%
+          );
+        overflow: hidden;
+      }
+
+      .tc-mini-map .mini-head {
+        padding: 10px 12px 0;
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .tc-mini-map .mini-body {
+        padding: 10px 12px 14px;
+        position: relative;
+        height: 140px;
+      }
+
+      .tc-mini-map .hint {
+        position: absolute;
+        bottom: 10px;
+        left: 12px;
+        right: 12px;
+        font-size: 12px;
+        color: #2a4750;
+        opacity: 0.85;
+      }
+
+      .mini-path {
+        position: absolute;
+        inset: 0;
+      }
+
+      .mini-dot {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--gold);
+        border: 2px solid #fff;
+        box-shadow: 0 6px 14px rgba(212, 165, 55, 0.35);
+        transform: translate(-50%, -50%);
+      }
+
+      .mini-label {
+        position: absolute;
+        transform: translate(-50%, -140%);
+        font-size: 11px;
+        color: var(--primary);
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(26, 77, 90, 0.18);
+        padding: 3px 7px;
+        border-radius: 999px;
+        white-space: nowrap;
+        backdrop-filter: blur(6px);
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tc-places {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-top: 2px;
+      }
+
+      .chip {
+        border-radius: 999px;
+        border: 1px solid rgba(26, 77, 90, 0.18);
+        background: rgba(26, 77, 90, 0.04);
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #1f3f46;
+        font-weight: 500;
+      }
+
+      .tc-bottom {
+        padding: 16px 20px 22px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .tc-short-desc {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .tc-open-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--primary);
+        font-weight: 600;
+        font-size: 13px;
+        border: 1px solid rgba(26, 77, 90, 0.16);
+        background: rgba(255, 255, 255, 0.65);
+        padding: 10px 12px;
+        border-radius: 14px;
+      }
+
+      .tc-modal {
+        position: static;
+        inset: auto;
+        z-index: auto;
+        display: block;
+        background: transparent;
+      }
+
+      .tc-modal.active {
+        display: block;
+      }
+
+      .tc-modal-bg {
+        display: none;
+      }
+
+      .tc-modal.active .tc-modal-bg {
+        display: none;
+      }
+
+      .tc-modal-content {
+        position: relative;
+        margin: 0 auto;
+        width: min(1280px, 100%);
+        max-height: none;
+        overflow-y: visible;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+
+      .tc-modal.active .tc-modal-content {
+        opacity: 1;
+        transform: none;
+      }
+
+      .tc-modal-header {
+        display: none;
+      }
+
+      .tc-modal-header .title {
+        font-family: "Playfair Display", serif;
+        color: var(--primary);
+        font-size: 22px;
+        margin: 0;
+      }
+
+      .tc-modal-close {
+        display: none;
+      }
+
+      .tc-modal-body {
+        padding: 0;
+      }
+
+      .tc-hero {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr) minmax(300px, 400px);
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 32px;
+      }
+
+      .tc-hero-thumbs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: min(520px, 60vh);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(26, 77, 90, 0.25) transparent;
+      }
+
+      .tc-hero-thumbs::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .tc-hero-thumbs::-webkit-scrollbar-thumb {
+        background: rgba(26, 77, 90, 0.25);
+        border-radius: 4px;
+      }
+
+      .tc-hero-main .tc-gallery-main {
+        border-radius: 20px;
+      }
+
+      .tc-hero-main .tc-gallery-main img {
+        width: 100%;
+        height: min(520px, 58vh);
+        min-height: 320px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .tc-hero-info {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+        border: 0.8px solid rgba(26, 77, 90, 0.15);
+        border-radius: 16px;
+        padding: 20px;
+        background: #ffffff;
+        align-self: start;
+        max-height: calc(min(520px, 58vh) + 40px);
+        overflow-y: auto;
+      }
+
+      .tc-hero-title {
+        font-family: "Playfair Display", serif;
+        color: var(--primary);
+        font-size: clamp(22px, 2.2vw, 28px);
+        line-height: 1.2;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .tc-hero-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 14px;
+      }
+
+      .tc-hero-rating .star {
+        color: var(--gold);
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .tc-hero-rating .score {
+        font-weight: 700;
+        color: #122127;
+      }
+
+      .tc-hero-rating .reviews-link {
+        color: var(--muted);
+        text-decoration: none;
+        border-bottom: 1px dashed rgba(107, 123, 134, 0.5);
+      }
+
+      .tc-hero-rating .reviews-link:hover {
+        color: var(--primary);
+      }
+
+      .tc-hero-book {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+        background: linear-gradient(180deg, #fafcfd, #ffffff);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .tc-hero-book-label {
+        color: var(--muted);
+        font-size: 13px;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .tc-hero-book .price-now {
+        font-family: "Playfair Display", serif;
+        font-size: 32px;
+        color: var(--primary);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .tc-hero-book .tc-book-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .tc-hero-meta .tc-icons {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .tc-hero-gallery-nav {
+        display: none;
+      }
+
+      .tc-hero-dots {
+        display: flex;
+        justify-content: center;
+        margin-top: 12px;
+      }
+
+      @media (max-width: 1024px) {
+        .tc-hero {
+          grid-template-columns: 1fr;
+        }
+
+        .tc-hero-thumbs {
+          flex-direction: row;
+          max-height: none;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 4px;
+        }
+
+        .tc-hero-thumbs .tc-g-thumb {
+          width: 64px;
+          height: 64px;
+          flex-shrink: 0;
+        }
+
+        .tc-hero-main .tc-gallery-main img {
+          height: min(360px, 50vh);
+          min-height: 240px;
+        }
+      }
+
+      .tc-modal-section {
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+        background: transparent;
+      }
+
+      .tc-section-head {
+        padding: 14px 0;
+        background: transparent;
+        border-bottom: 2px solid var(--line);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .tc-section-body {
+        padding: 14px 0;
+      }
+
+      .tc-gallery-main {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 0.8px solid rgba(26, 77, 90, 0.15);
+        background: #f2f6f8;
+      }
+
+      .tc-gallery-main img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .tc-hero-main .tc-gallery-caption {
+        display: none;
+        margin-top: 10px;
+        padding: 0;
+        border: none;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      .tc-gallery-caption {
+        display: none;
+        padding: 10px 12px;
+        color: #2a4750;
+        font-weight: 600;
+        border-top: 1px solid var(--line);
+      }
+
+      .tc-gallery-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+        justify-content: center;
+      }
+
+      .tc-g-arrow {
+        border: 1px solid rgba(26, 77, 90, 0.18);
+        background: rgba(26, 77, 90, 0.04);
+        color: var(--primary);
+        border-radius: 14px;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .tc-g-dots {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .tc-g-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 1px solid rgba(212, 165, 55, 0.6);
+        background: transparent;
+        cursor: pointer;
+        transition: transform 120ms ease, background 120ms ease;
+      }
+
+      .tc-g-dot.active {
+        background: var(--gold);
+        transform: scale(1.18);
+      }
+
+      .tc-gallery-thumbs {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .tc-g-thumb {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 0.8px solid rgba(26, 77, 90, 0.12);
+        cursor: pointer;
+        width: 64px;
+        height: 64px;
+        flex-shrink: 0;
+        position: relative;
+        background: #f5f8fa;
+        transition: border-color 0.15s ease;
+      }
+
+      .tc-g-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .tc-g-thumb.active {
+        border-color: #3b82f6;
+        outline: none;
+      }
+
+      .tc-map {
+        height: 320px;
+        width: 100%;
+      }
+
+      .day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .day-card {
+        border: 1px solid rgba(26, 77, 90, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+        background: #ffffff;
+      }
+
+      .day-card .day-head {
+        padding: 12px 14px;
+        font-weight: 800;
+        color: var(--primary);
+        border-bottom: 1px solid rgba(26, 77, 90, 0.12);
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .day-card .day-body {
+        padding: 12px 14px;
+        color: #173338;
+        line-height: 1.55;
+        font-size: 14px;
+      }
+
+      .review-summary {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .review-score {
+        width: 94px;
+        height: 94px;
+        border-radius: 22px;
+        border: 1px solid rgba(26, 77, 90, 0.14);
+        background:
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(212, 165, 55, 0.14),
+            transparent 45%
+          ),
+          rgba(26, 77, 90, 0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .review-score .num {
+        font-family: "Playfair Display", serif;
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 26px;
+        line-height: 1;
+      }
+
+      .review-score .stars {
+        color: var(--gold);
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      .review-summary .meta {
+        flex: 1;
+      }
+
+      .review-summary .meta .small {
+        color: var(--muted);
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+
+      .review-summary .meta .title {
+        font-weight: 800;
+        color: #173338;
+      }
+
+      .rating-stars-input {
+        display: flex;
+        gap: 6px;
+        margin: 10px 0;
+      }
+
+      .rating-stars-input .star-btn {
+        border: none;
+        background: none;
+        font-size: 24px;
+        color: var(--line);
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: color 0.15s, transform 0.15s;
+      }
+
+      .rating-stars-input .star-btn:hover,
+      .rating-stars-input .star-btn.active {
+        color: var(--gold);
+        transform: scale(1.1);
+      }
+
+      .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .review-card {
+        border: 1px solid rgba(26, 77, 90, 0.12);
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: rgba(26, 77, 90, 0.02);
+      }
+
+      .review-card .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .review-card .name {
+        font-weight: 800;
+        color: #173338;
+        font-size: 14px;
+      }
+
+      .review-card .date {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .review-card .text {
+        color: #18363f;
+        line-height: 1.55;
+        font-size: 14px;
+      }
+
+      .review-form {
+        margin-top: 14px;
+        border-top: 1px dashed rgba(26, 77, 90, 0.18);
+        padding-top: 12px;
+      }
+
+      .review-form .row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .review-form textarea {
+        width: 100%;
+        min-height: 92px;
+        resize: vertical;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(26, 77, 90, 0.18);
+        outline: none;
+        background: rgba(26, 77, 90, 0.02);
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      .review-form .disabled-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+
+      .sticky-book {
+        display: none;
+      }
+
+      /* Hide Leaflet logo */
+      .leaflet-control-attribution img {
+        display: none !important;
+      }
+      .leaflet-control-attribution svg {
+        display: none !important;
+      }
+      .leaflet-control-attribution {
+        background-image: none !important;
+      }
+
+      .places-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .place-card {
+        border: 1px solid rgba(26, 77, 90, 0.12);
+        border-radius: 12px;
+        overflow: hidden;
+        background: #ffffff;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .place-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(26, 77, 90, 0.08);
+      }
+
+      .place-card img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .place-card-title {
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary);
+        text-align: center;
+      }
+
+      @media (max-width: 940px) {
+        .tc-top {
+          grid-template-columns: 1fr;
+        }
+        .tc-thumb-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .tc-thumb {
+          height: 86px;
+        }
+        .tc-middle {
+          grid-template-columns: 1fr;
+        }
+        .tc-gallery-main img {
+          height: 300px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar" id="navbar">
+      <div class="container">
+        <div class="nav-brand">
+          <span class="ornament">᠄</span>
+          <a href="index.html#hero">Бурятия</a>
+          <span class="ornament">᠄</span>
+        </div>
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html#about">О Бурятии</a></li>
+          <li><a href="attractions.html">Достопримечательности</a></li>
+          <li><a href="routes.html">Маршруты</a></li>
+          <li><a href="constructor.html">Конструктор</a></li>
+          <li><a href="community-tours.html">Туры сообщества</a></li>
+          <li><a href="traditions.html">Традиции</a></li>
+          <li><a href="gastronomy.html">Гастротуризм</a></li>
+          <li><a href="contacts.html">Контакты</a></li>
+        </ul>
+        <div class="hamburger" id="hamburger">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </nav>
+
+    <div id="tdLoading" class="td-loading">
+      <div class="td-spinner"></div>
+      <p>Загружаем тур...</p>
+    </div>
+
+    <div id="tdContent" style="display: none">
+      <div class="page">
+        <a href="community-tours.html" class="tc-back">← Все туры сообщества</a>
+
+        <article
+          class="tour-card"
+          id="tourCard"
+          aria-label="Карточка тура: раскрыть полную информацию"
+        >
+          <div class="tc-top">
+            <div>
+              <div class="tc-thumb-grid" id="thumbsCollapsed"></div>
+            </div>
+
+            <div class="tc-main-meta">
+              <h1 class="tc-title" id="tourTitle"></h1>
+
+              <div class="tc-icons" aria-label="Краткие характеристики тура">
+                <div class="tc-icon">
+                  <div class="label">Длительность</div>
+                  <div class="value">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M8 2v4" />
+                      <path d="M16 2v4" />
+                      <path d="M3 10h18" />
+                      <path
+                        d="M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+                      />
+                    </svg>
+                    <span id="tcDuration"></span>
+                  </div>
+                </div>
+
+                <div class="tc-icon">
+                  <div class="label">Сложность</div>
+                  <div class="value">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" />
+                    </svg>
+                    <span id="tcDifficulty"></span>
+                  </div>
+                </div>
+
+                <div class="tc-icon">
+                  <div class="label">Сезон</div>
+                  <div class="value">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2" />
+                      <path d="M12 20v2" />
+                      <path d="M4.93 4.93l1.41 1.41" />
+                      <path d="M17.66 17.66l1.41 1.41" />
+                      <path d="M2 12h2" />
+                      <path d="M20 12h2" />
+                      <path d="M4.93 19.07l1.41-1.41" />
+                      <path d="M17.66 6.34l1.41-1.41" />
+                    </svg>
+                    <span id="tcSeason"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tc-price-row">
+                <div class="tc-price">
+                  <span class="now" id="tcPriceNow"></span>
+                  <span class="old" id="tcPriceOld"></span>
+                </div>
+
+                <button type="button" class="tc-book-btn" id="btnBookTop">
+                  Забронировать
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tc-middle">
+            <div class="tc-mini-map" aria-label="Мини-карта тура">
+              <div class="mini-head">Маршрут</div>
+              <div class="mini-body" id="miniMapBody">
+                <div class="hint">Интерактивная карта откроется в развёрнутом виде</div>
+              </div>
+            </div>
+
+            <div class="tc-places" id="tcPlacesChips"></div>
+          </div>
+
+          <div class="tc-bottom">
+            <div class="tc-short-desc">
+              <span style="color: var(--primary); font-weight: 700">Автор:</span>
+              <span id="tcAuthor"></span>
+              ·
+              <span style="color: var(--primary); font-weight: 700">Рейтинг:</span>
+              <span id="tcRating"></span>
+            </div>
+            <div class="tc-open-badge">
+              Раскрыть полную информацию
+              <span style="color: var(--gold); font-weight: 900">᠄</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="tc-modal" id="tourModal" aria-hidden="true">
+        <div class="tc-modal-bg" id="tourModalBg"></div>
+        <div
+          class="tc-modal-content"
+          role="dialog"
+          aria-modal="true"
+          id="tourModalContent"
+        >
+          <div class="tc-modal-header">
+            <h2 class="title" id="modalTitle" hidden></h2>
+            <button
+              type="button"
+              class="tc-modal-close"
+              id="modalClose"
+              aria-label="Закрыть"
+            >
+              ×
+            </button>
+          </div>
+
+          <div class="tc-modal-body">
+            <div class="tc-hero">
+              <aside class="tc-hero-thumbs" aria-label="Фото мест маршрута">
+                <div class="tc-gallery-thumbs" id="galleryThumbs"></div>
+              </aside>
+
+              <div class="tc-hero-main">
+                <div class="tc-gallery-main">
+                  <img id="galleryMainImg" alt="" />
+                </div>
+                <div class="tc-gallery-caption" id="galleryCaption"></div>
+
+                <div class="tc-hero-gallery-nav tc-gallery-nav">
+                  <button
+                    class="tc-g-arrow"
+                    id="galleryPrev"
+                    aria-label="Предыдущее фото"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    class="tc-g-arrow"
+                    id="galleryNext"
+                    aria-label="Следующее фото"
+                  >
+                    ›
+                  </button>
+                </div>
+
+                <div class="tc-hero-dots tc-g-dots" id="galleryDots"></div>
+              </div>
+
+              <aside class="tc-hero-info">
+                <h1 class="tc-hero-title" id="heroTitle"></h1>
+
+                <div class="tc-hero-rating" id="heroRating"></div>
+
+                <div class="tc-hero-book">
+                  <div>
+                    <span class="tc-hero-book-label">Стоимость тура</span>
+                    <span class="price-now" id="modalPriceNow"></span>
+                    <div style="color: var(--muted); font-size: 13px">
+                      <span id="modalPriceOld"></span>
+                    </div>
+                  </div>
+                  <button type="button" class="tc-book-btn" id="btnBookBottom">
+                    Забронировать
+                  </button>
+                </div>
+
+                <div class="tc-hero-meta">
+                  <div class="tc-icons" aria-label="Характеристики тура">
+                    <div class="tc-icon">
+                      <div class="label">Длительность</div>
+                      <div class="value">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M8 2v4" />
+                          <path d="M16 2v4" />
+                          <path d="M3 10h18" />
+                          <path
+                            d="M5 6h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
+                          />
+                        </svg>
+                        <span id="heroDuration"></span>
+                      </div>
+                    </div>
+
+                    <div class="tc-icon">
+                      <div class="label">Сложность</div>
+                      <div class="value">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z" />
+                        </svg>
+                        <span id="heroDifficulty"></span>
+                      </div>
+                    </div>
+
+                    <div class="tc-icon">
+                      <div class="label">Сезон</div>
+                      <div class="value">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="4" />
+                          <path d="M12 2v2" />
+                          <path d="M12 20v2" />
+                          <path d="M4.93 4.93l1.41 1.41" />
+                          <path d="M17.66 17.66l1.41 1.41" />
+                          <path d="M2 12h2" />
+                          <path d="M20 12h2" />
+                          <path d="M4.93 19.07l1.41-1.41" />
+                          <path d="M17.66 6.34l1.41-1.41" />
+                        </svg>
+                        <span id="heroSeason"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <!-- Full Width Sections Below -->
+          <!-- Places Cards Section -->
+          <section class="tc-modal-section" style="grid-column: 1 / -1">
+            <div class="tc-section-head">Места маршрута</div>
+            <div class="tc-section-body">
+              <div class="places-grid" id="placesGrid"></div>
+            </div>
+          </section>
+
+          <section class="tc-modal-section" style="grid-column: 1 / -1">
+            <div class="tc-section-head">Этапы маршрута</div>
+            <div class="tc-section-body">
+              <div class="day-list" id="itinerary"></div>
+            </div>
+          </section>
+
+          <section class="tc-modal-section" style="grid-column: 1 / -1">
+            <div class="tc-section-head">Маршрут и описание</div>
+            <div class="tc-section-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px">
+              <div>
+                <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--primary)">Карта маршрута</h4>
+                <div id="leafletMap" class="tc-map"></div>
+              </div>
+              <div>
+                <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--primary)">Описание</h4>
+                <div
+                  id="fullDescription"
+                  style="color: #18363f; line-height: 1.6; font-size: 14px"
+                ></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tc-modal-section" id="reviewsSection" style="grid-column: 1 / -1">
+            <div class="tc-section-head">Отзывы</div>
+            <div class="tc-section-body">
+              <div class="review-summary" id="reviewSummary"></div>
+
+              <div class="reviews-list" id="reviewsList"></div>
+
+                <div class="review-form" id="reviewFormBlock">
+                  <div style="font-weight: 800; color: var(--primary); margin-bottom: 8px">
+                    Оставить отзыв
+                  </div>
+                  <div class="rating-stars-input" id="ratingStars">
+                    <button type="button" class="star-btn" data-rating="1" aria-label="1 звезда">★</button>
+                    <button type="button" class="star-btn" data-rating="2" aria-label="2 звезды">★</button>
+                    <button type="button" class="star-btn" data-rating="3" aria-label="3 звезды">★</button>
+                    <button type="button" class="star-btn" data-rating="4" aria-label="4 звезды">★</button>
+                    <button type="button" class="star-btn" data-rating="5" aria-label="5 звезд">★</button>
+                  </div>
+                  <p class="disabled-note" id="userRatingText">Нажмите на звезду, чтобы оценить маршрут</p>
+                  <div class="row">
+                    <textarea
+                      id="reviewText"
+                      placeholder="Ваш отзыв…"
+                      disabled
+                    ></textarea>
+                    <button
+                      type="button"
+                      class="tc-book-btn"
+                      id="btnSubmitReview"
+                      disabled
+                    >
+                      Отправить отзыв
+                    </button>
+                    <div class="disabled-note" id="reviewAuthNote">
+                      Войдите, чтобы оставить отзыв.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer" id="tdFooter" style="display: none">
+      <div class="ornament-pattern"></div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>Контакты</h3>
+            <p>Email: info@buryatia-tourism.ru</p>
+            <p>Телефон: +7 (3012) 123-456</p>
+            <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+          </div>
+          <div class="footer-section">
+            <h3>Социальные сети</h3>
+            <div class="social-links">
+              <a href="#" title="VKontakte">VK</a>
+              <a href="#" title="Telegram">TG</a>
+              <a href="#" title="Instagram">IG</a>
+            </div>
+          </div>
+          <div class="footer-section">
+            <h3>Цитата на бурятском</h3>
+            <blockquote class="buryat-quote">
+              <p>"Байгал далай — манай эрдэни"</p>
+              <cite>— Байкал — наше сокровище</cite>
+            </blockquote>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script src="js/attraction-coordinates.js"></script>
+    <script src="tour-detail.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+  </body>
+</html>

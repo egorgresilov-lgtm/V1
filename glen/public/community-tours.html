@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Туры сообщества — Бурятия. Дух места</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.2.4/ol.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Hero ── */
+        .community-hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(26, 82, 118, 0.5), rgba(200, 80, 50, 0.35)),
+                        url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600');
+            background-size: cover;
+            background-position: center 40%;
+            min-height: 400px;
+            padding-top: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .community-hero .hero-overlay {
+            position: absolute; inset: 0;
+            background: rgba(26, 58, 74, 0.18);
+            z-index: 1;
+        }
+        .community-hero .hero-content {
+            position: relative; z-index: 2;
+            text-align: center;
+            color: var(--white);
+            padding: 3rem 2rem;
+            width: 100%;
+        }
+        .community-hero .title-main {
+            display: block;
+            font-size: clamp(36px, 7vw, 68px);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--white);
+            text-shadow: 0 4px 20px rgba(0,0,0,0.35);
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        .community-hero .title-subtitle {
+            display: block;
+            font-size: clamp(18px, 3.5vw, 32px);
+            font-weight: 300;
+            margin-top: 0.8rem;
+            font-style: italic;
+            color: rgba(255,255,255,0.92);
+            font-family: var(--font-accent);
+            letter-spacing: 0.08em;
+        }
+        .community-hero .hero-subtitle {
+            font-size: clamp(14px, 2vw, 20px);
+            margin-top: 1rem;
+            opacity: 0.9;
+            font-family: var(--font-body);
+            font-weight: 300;
+        }
+
+        /* ── Page layout ── */
+        .community-page {
+            padding: 3rem 0 5rem;
+        }
+
+        /* ── Stats bar ── */
+        .community-stats {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .community-stats .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            min-width: 120px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .community-stats .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .community-stats .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-family: var(--font-heading);
+        }
+        .community-stats .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 0.3rem;
+        }
+
+        /* ── Controls ── */
+        .community-controls {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .community-controls .palette-filter {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .community-controls .create-btn {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.4rem;
+            background: var(--gradient-accent);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s;
+            white-space: nowrap;
+        }
+        .community-controls .create-btn:hover {
+            opacity: 0.88;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232,185,96,0.4);
+        }
+
+        /* ── Tours grid ── */
+        .community-tours-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        /* ── Tour card ── */
+        .community-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .community-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: var(--radius-lg);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .community-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-xl); }
+        .community-card:hover::before { opacity: 0.04; }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent-gold) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+        }
+
+        .card-body {
+            padding: 1.4rem 1.5rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        .card-badges {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-family: var(--font-heading);
+        }
+        .badge-easy    { background: #dcfce7; color: #16a34a; }
+        .badge-medium  { background: #fef9c3; color: #ca8a04; }
+        .badge-hard    { background: #fee2e2; color: #dc2626; }
+        .badge-season  { background: rgba(44,95,124,0.1); color: var(--primary); }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem;
+            font-family: var(--font-heading);
+            line-height: 1.35;
+        }
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin: 0 0 1rem;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.9rem;
+            border-top: 1px solid var(--bg-secondary);
+            margin-top: auto;
+        }
+        .card-meta-left { display: flex; flex-direction: column; gap: 0.15rem; }
+        .card-author {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-family: var(--font-heading);
+        }
+        .card-duration {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--cultural-gold);
+        }
+        .card-rating span { font-size: 1.1rem; }
+
+        /* ── Empty / Loading states ── */
+        .state-box {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-secondary);
+        }
+        .state-box .state-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .state-box h3 { font-size: 1.4rem; color: var(--text-primary); margin-bottom: 0.5rem; }
+        .state-box p  { font-size: 1rem; }
+        .spinner-ring {
+            width: 48px; height: 48px;
+            border: 4px solid var(--bg-secondary);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── CTA block ── */
+        .community-cta {
+            margin-top: 4rem;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        .community-cta::before {
+            content: '᠄ ❋ ᠄';
+            position: absolute;
+            top: 1.2rem; left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            opacity: 0.4;
+            letter-spacing: 1rem;
+        }
+        .community-cta h2 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-family: var(--font-heading);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.8rem;
+        }
+        .community-cta p {
+            font-size: 1rem;
+            opacity: 0.88;
+            margin-bottom: 1.8rem;
+            font-family: var(--font-body);
+        }
+        .community-cta .btn-cta {
+            display: inline-block;
+            padding: 0.85rem 2.2rem;
+            background: var(--white);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+        .community-cta .btn-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .community-tours-grid { grid-template-columns: 1fr; }
+            .community-controls { flex-direction: column; align-items: stretch; }
+            .community-controls .create-btn { margin-left: 0; text-align: center; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="index.html#hero">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about">О Бурятии</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html">Маршруты</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html" class="active">Туры сообщества</a></li>
+                <li><a href="traditions.html">Традиции</a></li>
+                <li><a href="gastronomy.html">Гастротуризм</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="page-hero community-hero">
+        <div class="hero-overlay"></div>
+        <div class="ornament-border"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Туры сообщества</span>
+                <span class="title-subtitle">Маршруты от путешественников</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Откройте Бурятию глазами тех, кто уже побывал здесь</p>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <main class="community-page">
+        <div class="container">
+
+            <!-- Stats -->
+            <div class="community-stats scroll-reveal">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">Всего туров</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statEasy">0</div>
+                    <div class="stat-label">Лёгких</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statMedium">0</div>
+                    <div class="stat-label">Средних</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statHard">0</div>
+                    <div class="stat-label">Сложных</div>
+                </div>
+            </div>
+
+            <!-- Controls: filters + button -->
+            <div class="community-controls scroll-reveal">
+                <div class="palette-filter">
+                    <button class="filter-btn active" onclick="filterTours('all')">Все</button>
+                    <button class="filter-btn" onclick="filterTours('easy')">Лёгкие</button>
+                    <button class="filter-btn" onclick="filterTours('medium')">Средние</button>
+                    <button class="filter-btn" onclick="filterTours('hard')">Сложные</button>
+                    <button class="filter-btn" onclick="filterTours('summer')">Лето</button>
+                    <button class="filter-btn" onclick="filterTours('winter')">Зима</button>
+                    <button class="filter-btn" onclick="filterTours('year-round')">Круглый год</button>
+                </div>
+                <a href="constructor.html" class="create-btn">＋ Создать маршрут</a>
+            </div>
+
+            <!-- Grid -->
+            <div class="community-tours-grid" id="toursGrid">
+                <!-- filled by JS -->
+            </div>
+
+            <!-- CTA -->
+            <div class="community-cta scroll-reveal">
+                <h2>Создайте свой маршрут</h2>
+                <p>Поделитесь любимыми местами Бурятии с сообществом путешественников</p>
+                <a href="constructor.html" class="btn-cta">Открыть конструктор</a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="ornament-pattern"></div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Байгал далай — манай эрдэни"</p>
+                        <cite>— Байкал — наше сокровище</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Tour detail overlay -->
+    <div id="ctOverlay" class="routes-tour-overlay" aria-hidden="true">
+        <div class="routes-tour-detail" id="ctDetail" role="dialog" aria-modal="true"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.2.4/dist/ol.js"></script>
+    <script src="script.js"></script>
+    <script src="js/attraction-coordinates.js"></script>
+    <script src="community-tours.js"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>

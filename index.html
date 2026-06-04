@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Байкал — сайт</title>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: #f7f7f8; color: #111; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 40px; }
+    .card { background: #fff; border: 1px solid #e8e8ec; border-radius: 14px; padding: 18px; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    h1 { margin: 0 0 10px; font-size: 22px; }
+    p { margin: 8px 0; line-height: 1.5; color: #333; }
+    .links { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+    a.btn {
+      display: inline-flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #e8e8ec;
+      text-decoration: none;
+      color: #111;
+      background: #fafafa;
+    }
+    a.btn:hover { background: #f1f1f4; }
+    .muted { color: #666; font-size: 12px; margin-top: 12px; }
+    code { background: #f2f2f6; border: 1px solid #e5e5ee; padding: 1px 6px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Байкал — сайт достопримечательностей</h1>
+      <p>Выберите раздел:</p>
+      <div class="links">
+        <a class="btn" href="./baikal_map.html">
+          <span>Открыть интерактивную карту с метками</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      <div class="muted">
+        Подсказка: если изменения не видны, обновите страницу жёстко: <code>Ctrl+F5</code>.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
