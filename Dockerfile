@@ -18,5 +18,5 @@ ENV PORT=3000
 # Expose port
 EXPOSE 3000
 
-# Start application
-CMD ["npm", "start"]
+# Start application directly with Node.js (more reliable in containers)
+CMD ["node", "server.js"]
