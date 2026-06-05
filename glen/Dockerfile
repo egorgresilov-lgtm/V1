@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -19,4 +19,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Start application
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
