@@ -5,10 +5,13 @@ WORKDIR /app
 # Copy glen directory (where package.json is located)
 COPY glen/ ./
 
+# Use production environment configuration
+RUN cp .env.production .env || true
+
 # Install dependencies
 RUN npm ci --only=production
 
-# Set environment variables
+# Set environment variables (override if needed)
 ENV NODE_ENV=production
 ENV PORT=3000
 
