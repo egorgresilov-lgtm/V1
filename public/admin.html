@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - Бурятия Tourism</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.2.4/ol.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 80px auto 20px;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #1a5276, #2980b9);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #d4ac0d;
+        }
+        
+        .admin-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #5d6d7e;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-tab.active {
+            color: #1a5276;
+            border-bottom: 3px solid #d4ac0d;
+        }
+        
+        .admin-content {
+            display: none;
+        }
+        
+        .admin-content.active {
+            display: block;
+        }
+        
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: #1a5276;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #ede8dc;
+        }
+        
+        .data-table tr:hover {
+            background: #f8f6f0;
+        }
+        
+        .btn-action {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #f1c40f;
+            color: #2c3e50;
+        }
+        
+        .btn-delete {
+            background: #c0392b;
+            color: white;
+        }
+        
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            position: relative;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .modal-close-btn {
+            flex-shrink: 0;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.9rem;
+            background: #f8f6f0;
+            border: 1px solid #ede8dc;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #4a5568;
+        }
+
+        .modal-close-btn:hover {
+            background: #ede8dc;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ede8dc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2980b9;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .dest-image-preview {
+            margin-top: 0.75rem;
+        }
+
+        .dest-image-preview img {
+            display: block;
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #ede8dc;
+        }
+
+        .dest-image-remove {
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            background: #f8f6f0;
+            border: 1px solid #ede8dc;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #c0392b;
+        }
+
+        .dest-image-hint {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.35rem;
+        }
+
+        .route-stages-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .route-stage-row label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+            color: #2c3e50;
+        }
+
+        .route-stage-row select {
+            width: 100%;
+            padding: 0.65rem;
+            border: 2px solid #ede8dc;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+
+        #destinationModal .modal-content {
+            max-width: 720px;
+        }
+
+        .dest-map-picker {
+            height: 300px;
+            width: 100%;
+            border-radius: 8px;
+            border: 2px solid #ede8dc;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .dest-coords-display {
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin: 0.5rem 0 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container">
+        <h2 style="text-align: center; color: #1a5276; margin-bottom: 0.5rem;">Вход в админ-панель</h2>
+        <p style="text-align: center; color: #718096; margin-bottom: 1.5rem; font-size: 0.95rem;">
+            Введите пароль администратора
+        </p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginPassword">Пароль</label>
+                <input type="password" id="loginPassword" autocomplete="current-password" required minlength="1">
+            </div>
+            <p id="loginError" style="color: #c0392b; font-size: 0.9rem; margin-bottom: 1rem; display: none;"></p>
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginSubmitBtn">Войти</button>
+        </form>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-container" style="display: none;">
+        <div class="admin-header">
+            <h1>Админ-панель</h1>
+            <p>Управление контентом сайта</p>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="destinations">Достопримечательности</button>
+            <button class="admin-tab" data-tab="tours">Маршруты</button>
+            <button class="admin-tab" data-tab="communityTours">Туры сообщества</button>
+            <button class="admin-tab" data-tab="bookings">Бронирования</button>
+            <button class="admin-tab" data-tab="reviews">Отзывы</button>
+            <button class="admin-tab" data-tab="facts">Факты</button>
+        </div>
+
+        <!-- Destinations Tab -->
+        <div id="destinationsTab" class="admin-content active">
+            <button class="btn btn-primary" onclick="openDestinationModal()" style="margin-bottom: 1rem;">
+                + Добавить достопримечательность
+            </button>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Тип</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="destinationsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Routes Tab -->
+        <div id="toursTab" class="admin-content">
+            <button class="btn btn-primary" onclick="openRouteModal()" style="margin-bottom: 1rem;">
+                + Добавить маршрут
+            </button>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Код</th>
+                            <th>Название</th>
+                            <th>Длительность</th>
+                            <th>Этапов</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="toursTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Community Tours Tab -->
+        <div id="communityToursTab" class="admin-content">
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Дней</th>
+                            <th>Сложность</th>
+                            <th>Статус</th>
+                            <th>Просмотры</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="communityToursTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bookings Tab -->
+        <div id="bookingsTab" class="admin-content">
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Тур</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div id="reviewsTab" class="admin-content">
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Автор</th>
+                            <th>Рейтинг</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Facts Tab -->
+        <div id="factsTab" class="admin-content">
+            <button class="btn btn-primary" onclick="alert('Функция в разработке')" style="margin-bottom: 1rem;">
+                + Добавить факт
+            </button>
+            <div class="data-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Факт (RU)</th>
+                            <th>Активен</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="factsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Destination Form -->
+    <div id="destinationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Добавить достопримечательность</h2>
+                <button type="button" class="modal-close-btn" id="destinationModalClose" aria-label="Закрыть">Закрыть</button>
+            </div>
+            <form id="destinationForm">
+                <input type="hidden" id="destId">
+                <div class="form-group">
+                    <label>Название (русский)</label>
+                    <input type="text" id="destNameRu" required>
+                </div>
+                <div class="form-group">
+                    <label for="destDescRu">Краткое описание</label>
+                    <textarea id="destDescRu" rows="3" placeholder="Текст для карточки на сайте"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="destFullDescRu">Полное описание</label>
+                    <textarea id="destFullDescRu" rows="10" placeholder="Текст в модальном окне на странице достопримечательностей"></textarea>
+                    <p class="dest-image-hint">Можно использовать HTML: &lt;br&gt;, &lt;strong&gt;, списки через &lt;br&gt;• …</p>
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select id="destType" required>
+                        <option value="baikal">Байкал</option>
+                        <option value="datsan">Места силы</option>
+                        <option value="villages">Сёла</option>
+                        <option value="steppe">Природные места</option>
+                        <option value="sun">Улан-Удэ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Метка на карте</label>
+                    <p class="dest-image-hint">Кликните по карте, чтобы поставить или переместить метку достопримечательности</p>
+                    <div id="destMapPicker" class="dest-map-picker"></div>
+                    <p id="destCoordsDisplay" class="dest-coords-display">Метка не установлена — кликните по карте</p>
+                    <button type="button" class="dest-image-remove" id="destClearMarker">Убрать метку</button>
+                </div>
+                <div class="form-group">
+                    <label for="destImageFile">Фотография</label>
+                    <input type="file" id="destImageFile" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="dest-image-hint">JPG, PNG, WebP или GIF, до 10 МБ</p>
+                    <input type="hidden" id="destImageUrl">
+                    <div id="destImagePreview" class="dest-image-preview" style="display: none;">
+                        <img id="destImagePreviewImg" alt="Превью">
+                        <button type="button" class="dest-image-remove" id="destImageRemove">Убрать фото</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeDestinationModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Route Form -->
+    <div id="routeModal" class="modal">
+        <div class="modal-content" style="max-width: 720px;">
+            <div class="modal-header">
+                <h2 id="routeModalTitle">Добавить маршрут</h2>
+                <button type="button" class="modal-close-btn" id="routeModalClose" aria-label="Закрыть">Закрыть</button>
+            </div>
+            <form id="routeForm">
+                <input type="hidden" id="routeId">
+                <div class="form-group">
+                    <label for="routeSlug">Код (латиница, для ссылки)</label>
+                    <input type="text" id="routeSlug" pattern="[a-zA-Z0-9_-]+" required placeholder="например rural">
+                </div>
+                <div class="form-group">
+                    <label for="routeCardTitle">Название на карточке</label>
+                    <input type="text" id="routeCardTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="routeCardBadge">Бейдж на карточке</label>
+                    <input type="text" id="routeCardBadge" placeholder="⏱ 4 дня / 3 ночи">
+                </div>
+                <div class="form-group">
+                    <label for="routeCardSummary">Краткий текст карточки</label>
+                    <textarea id="routeCardSummary" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="routeCardImageFile">Фото карточки</label>
+                    <input type="file" id="routeCardImageFile" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="dest-image-hint">JPG, PNG, WebP или GIF, до 10 МБ</p>
+                    <input type="hidden" id="routeCardImage">
+                    <div id="routeCardImagePreview" class="dest-image-preview" style="display: none;">
+                        <img id="routeCardImagePreviewImg" alt="Превью">
+                        <button type="button" class="dest-image-remove" id="routeCardImageRemove">Убрать фото</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="routeName">Полное название (в окне маршрута)</label>
+                    <input type="text" id="routeName" required>
+                </div>
+                <div class="form-group">
+                    <label for="routeDuration">Длительность</label>
+                    <input type="text" id="routeDuration" required>
+                </div>
+                <div class="form-group">
+                    <label for="routeDescription">Описание маршрута</label>
+                    <textarea id="routeDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="routeStagesCount">Количество этапов</label>
+                    <input type="number" id="routeStagesCount" min="0" max="20" value="0">
+                    <p class="dest-image-hint">Для каждого этапа выберите достопримечательность из списка</p>
+                    <div id="routeStagesEditor" class="route-stages-editor"></div>
+                </div>
+                <div class="form-group">
+                    <label for="routeThemeClass">Тема оформления</label>
+                    <select id="routeThemeClass" required>
+                        <option value="routes-theme-rural">Степной / деревня</option>
+                        <option value="routes-theme-active">Активный</option>
+                        <option value="routes-theme-spiritual">Духовный</option>
+                        <option value="routes-theme-winter">Зима</option>
+                        <option value="routes-theme-waterfalls">Водопады</option>
+                        <option value="routes-theme-tea">Чайный путь</option>
+                        <option value="routes-theme-baikal-regatta">Байкал</option>
+                        <option value="routes-theme-nomadic">Кочевье</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeRouteModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Community Tour Form -->
+    <div id="communityTourModal" class="modal">
+        <div class="modal-content" style="max-width: 720px;">
+            <div class="modal-header">
+                <h2 id="communityTourModalTitle">Редактировать тур сообщества</h2>
+                <button type="button" class="modal-close-btn" id="communityTourModalClose" aria-label="Закрыть">Закрыть</button>
+            </div>
+            <form id="communityTourForm">
+                <input type="hidden" id="ctId">
+                <div class="form-group">
+                    <label for="ctTitle">Название</label>
+                    <input type="text" id="ctTitle" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="ctShortDesc">Краткое описание</label>
+                    <input type="text" id="ctShortDesc" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="ctFullDesc">Полное описание</label>
+                    <textarea id="ctFullDesc" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="ctDurationDays">Длительность (дней)</label>
+                    <input type="number" id="ctDurationDays" min="1" max="30" required>
+                </div>
+                <div class="form-group">
+                    <label for="ctDifficulty">Сложность</label>
+                    <select id="ctDifficulty" required>
+                        <option value="easy">Лёгкий</option>
+                        <option value="medium">Средний</option>
+                        <option value="hard">Высокий</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ctSeason">Сезон</label>
+                    <select id="ctSeason" required>
+                        <option value="year-round">Круглый год</option>
+                        <option value="summer">Лето</option>
+                        <option value="winter">Зима</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ctPrice">Цена (₽), необязательно</label>
+                    <input type="number" id="ctPrice" min="0" step="1" placeholder="Без цены">
+                </div>
+                <div class="form-group">
+                    <label for="ctPhotoFile">Обложка</label>
+                    <input type="file" id="ctPhotoFile" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="dest-image-hint">JPG, PNG, WebP или GIF, до 10 МБ</p>
+                    <input type="hidden" id="ctPhotoUrl">
+                    <div id="ctPhotoPreview" class="dest-image-preview" style="display: none;">
+                        <img id="ctPhotoPreviewImg" alt="Превью">
+                        <button type="button" class="dest-image-remove" id="ctPhotoRemove">Убрать фото</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ctPointsCount">Количество точек маршрута</label>
+                    <input type="number" id="ctPointsCount" min="0" max="20" value="0">
+                    <p class="dest-image-hint">Для каждой точки выберите достопримечательность</p>
+                    <div id="ctPointsEditor" class="route-stages-editor"></div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeCommunityTourModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.2.4/dist/ol.js"></script>
+    <script src="/js/admin-auth.js"></script>
+    <script src="/admin.js"></script>
+</body>
+</html>

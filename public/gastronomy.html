@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гастротуризм — Бурятия Tourism</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.2.4/ol.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="index.html">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html">Маршруты</a></li>
+                <li><a href="traditions.html">Традиции</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html">Туры сообщества</a></li>
+                <li><a href="gastronomy.html" class="active">Гастротуризм</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="page-hero traditions-hero">
+        <div class="hero-overlay"></div>
+        <div class="ornament-border"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Гастротуризм</span>
+                <span class="title-subtitle">Вкусы Бурятии</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Буузы, бухлёр, хушуур и другие деликатесы кочевой кухни</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container traditions-page">
+        <!-- Statistics -->
+        <section class="traditions-stats scroll-reveal">
+            <div class="stat-card">
+                <div class="stat-number" id="cuisineCount">0</div>
+                <div class="stat-label">Блюд</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="restaurantCount">0</div>
+                <div class="stat-label">Ресторанов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="masterclassCount">0</div>
+                <div class="stat-label">Мастер-классов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Лет кулинарных традиций</div>
+            </div>
+        </section>
+
+        <!-- Cuisine Grid -->
+        <section class="cuisine-section">
+            <h2 class="section-title">
+                <span class="ornament">✦</span>
+                Национальная Кухня
+                <span class="ornament">✦</span>
+            </h2>
+            <div id="cuisineGrid" class="cuisine-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Where to Eat Section -->
+        <section class="festivals-section">
+            <h2 class="section-title">
+                <span class="ornament">🍽️</span>
+                Где Попробовать
+                <span class="ornament">🍽️</span>
+            </h2>
+            <div id="restaurantsGrid" class="festivals-cards-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Хоолгүй һайхан үдэр үгы"</p>
+                        <cite>— Нет прекраснее дня, чем день с хорошей едой</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="cuisineModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-body" id="modalBody">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.2.4/dist/ol.js"></script>
+    <script src="gastronomy.js?v=1"></script>
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+        }
+        
+        // Close menu when clicking on a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+        
+        // Sound toggle
+        
+        // Scroll reveal animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (navbar && window.scrollY > 50) {
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.15)';
+            } else if (navbar) {
+                navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+        });
+    </script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты | Бурятия Tourism</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="index.html">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html">Маршруты</a></li>
+                <li><a href="traditions.html">Традиции</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html">Туры сообщества</a></li>
+                <li><a href="gastronomy.html">Гастротуризм</a></li>
+                <li><a href="contacts.html" class="active">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-hero contacts-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Контакты</span>
+                <span class="title-subtitle">Мы всегда на связи</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Планируйте путешествие по Бурятии вместе с нами</p>
+        </div>
+    </section>
+
+    <main class="section contacts-page">
+        <div class="container">
+            <h2 class="section-title">
+                <span class="ornament">✦</span>
+                Связаться с нами
+                <span class="ornament">✦</span>
+            </h2>
+            <div class="contacts-grid">
+                <article class="contact-card scroll-reveal">
+                    <h3>Туристический центр</h3>
+                    <p><strong>Телефон:</strong> <a href="tel:+73012123456">+7 (3012) 123-456</a></p>
+                    <p><strong>Email:</strong> <a href="mailto:info@buryatia-tourism.ru">info@buryatia-tourism.ru</a></p>
+                    <p><strong>Адрес:</strong> г. Улан-Удэ, ул. Ленина, 1</p>
+                    <p><strong>График:</strong> Пн-Пт: 09:00-18:00</p>
+                </article>
+                <article class="contact-card scroll-reveal">
+                    <h3>Социальные сети</h3>
+                    <p>Следите за новыми маршрутами, фестивалями и спецпредложениями.</p>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </article>
+                <article class="contact-card scroll-reveal">
+                    <h3>Для партнёров</h3>
+                    <p><strong>Сотрудничество:</strong> <a href="mailto:partners@buryatia-tourism.ru">partners@buryatia-tourism.ru</a></p>
+                    <p><strong>Пресса:</strong> <a href="mailto:press@buryatia-tourism.ru">press@buryatia-tourism.ru</a></p>
+                    <p>Открыты к коллаборациям с гидами, отелями и локальными проектами.</p>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Ябаха зам үргэлжэ нээлтэтэй"</p>
+                        <cite>— Дорога всегда открыта</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        hamburger?.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.nav-menu a').forEach((link) => {
+            link.addEventListener('click', () => {
+                hamburger?.classList.remove('active');
+                navMenu?.classList.remove('active');
+            });
+        });
+
+        document.querySelectorAll('.scroll-reveal').forEach((el) => observer.observe(el));
+    </script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>

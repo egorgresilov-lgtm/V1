@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маршруты Бурятии | Пешие и трекинговые маршруты</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.2.4/ol.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="ornament">᠄</span>
+                <a href="index.html#hero">Бурятия</a>
+                <span class="ornament">᠄</span>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html#about">О Бурятии</a></li>
+                <li><a href="attractions.html">Достопримечательности</a></li>
+                <li><a href="routes.html" class="active">Маршруты</a></li>
+                <li><a href="constructor.html">Конструктор</a></li>
+                <li><a href="community-tours.html">Туры сообщества</a></li>
+                <li><a href="traditions.html">Традиции</a></li>
+                <li><a href="gastronomy.html">Гастротуризм</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="page-hero routes-hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title fade-in">
+                <span class="title-main">Маршруты</span>
+                <span class="title-subtitle">Пешие и трекинговые маршруты</span>
+            </h1>
+            <p class="hero-subtitle fade-in-delay">Откройте для себя природу Бурятии пешком</p>
+        </div>
+    </section>
+
+    <!-- Routes Section -->
+    <section class="routes-page section">
+        <div class="container">
+            <div class="routes-intro scroll-reveal">
+                <p class="intro-text">
+                    Выберите формат путешествия: от аутентичной деревенской Бурятии до активного
+                    маршрута с трекингом и рафтингом.
+                </p>
+            </div>
+
+            <div class="routes-tour-grid" id="routesTourGrid"></div>
+        </div>
+    </section>
+
+    <div id="routesTourOverlay" class="routes-tour-overlay" aria-hidden="true">
+        <div class="routes-tour-detail" id="routesTourDetail" role="dialog" aria-modal="true" aria-label="Детали маршрута">
+            <!-- Filled by routes.js -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="ornament-pattern"></div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@buryatia-tourism.ru</p>
+                    <p>Телефон: +7 (3012) 123-456</p>
+                    <p>Адрес: г. Улан-Удэ, ул. Ленина, 1</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Социальные сети</h3>
+                    <div class="social-links">
+                        <a href="#" title="VKontakte">VK</a>
+                        <a href="#" title="Telegram">TG</a>
+                        <a href="#" title="Instagram">IG</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Цитата на бурятском</h3>
+                    <blockquote class="buryat-quote">
+                        <p>"Ябаха зам үргэлжэ нээлтэтэй"</p>
+                        <cite>— Дорога всегда открыта</cite>
+                    </blockquote>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Бурятия Tourism. Дух Места.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.2.4/dist/ol.js"></script>
+    <script src="routes.js?v=14"></script>
+    <script src="js/admin-auth.js"></script>
+    <script src="js/admin-gate.js"></script>
+</body>
+</html>
