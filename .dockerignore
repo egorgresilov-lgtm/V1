@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+фотки/
+ошибка.txt
+error.log
+error2.log
+output.log
+output2.log
+.qoder/
+.uploads/
