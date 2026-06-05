@@ -1,18 +1,10 @@
 meta:
-  environment: nodejs
+  environment: node                   # 👈 environment: node, а не nodejs
   toolchain:
     name: npm
     version: "20"
 build:
-  skip: false
-  additionalCommands: null
-  artifacts:
-    "*": /
+  additionalCommands: npm install     # или npm ci для более строгой установки
 run:
-  persistenceMount: /data
-  scriptName: run.bat
-  scriptArguments: null
-  nodeArguments: null
-  command: npm run start
-  containerPort: 80
-  servicePort: 80
+  command: npm run start              # 👈 Основная команда запуска вашего сервера
+  containerPort: 3000                 # 👈 Порт из вашего кода
