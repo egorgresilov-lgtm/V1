@@ -3,10 +3,10 @@ meta:
   toolchain:
     name: npm
     version: "20"
-  workingDirectory: glen
 
 build:
-  additionalCommands: npm install
+  type: docker
+  dockerfile: Dockerfile
 
 run:
   command: npm run start
