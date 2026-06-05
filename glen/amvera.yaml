@@ -1,0 +1,19 @@
+---
+meta:
+  environment: Node.js
+  toolchain: Node.js 18
+
+build:
+  installDependencies:
+    - npm install --production
+
+run:
+  - npm start
+
+env:
+  NODE_ENV: production
+  PORT: 3000
+
+ports:
+  - port: 3000
+    protocol: HTTP
