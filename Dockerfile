@@ -2,8 +2,8 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy glen/glen directory (where package.json is located)
-COPY glen/glen/ ./
+# Copy glen directory (where package.json is located)
+COPY glen/ ./
 
 # Install dependencies
 RUN npm ci --only=production
