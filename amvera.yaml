@@ -1,7 +1,9 @@
 ---
 meta:
-  environment: Node.js
-  toolchain: Node.js 18
+  environment: "Node.js"
+  toolchain: "node.js-18"
+  name: "glen"
+  description: "Buryatia Tourism Application"
 
 build:
   workDir: ./glen
