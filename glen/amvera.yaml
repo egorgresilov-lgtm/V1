@@ -1,19 +1,17 @@
 ---
 meta:
-  environment: Node.js
-  toolchain: Node.js 18
+  environment: node
+  toolchain:
+    name: npm
+    version: 18
 
 build:
-  installDependencies:
-    - npm install --production
+  additionalCommands: npm install --production
 
 run:
-  - npm start
+  command: npm run start
+  containerPort: 3000
 
 env:
   NODE_ENV: production
   PORT: 3000
-
-ports:
-  - port: 3000
-    protocol: HTTP
