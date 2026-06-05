@@ -4,7 +4,7 @@ meta:
   toolchain: Node.js 18
 
 build:
-  workDir: ./glen
+  workDir: ./glen/glen
   installDependencies:
     - npm install --production
 
