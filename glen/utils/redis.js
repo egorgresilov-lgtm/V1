@@ -4,6 +4,12 @@ let redisClient = null;
 let redisConnected = false;
 
 const getRedisClient = async () => {
+  // Disabled in production without Redis - return stub
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Redis disabled in production mode');
+    return null;
+  }
+
   if (redisClient && redisConnected) return redisClient;
 
   try {
