@@ -105,11 +105,22 @@ app.use('/photos', express.static(path.join(__dirname, '..', 'фотки')));
 
 // Health check endpoint (first!)
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString(), port: PORT });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(), 
+    port: PORT,
+    env: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
 // API Routes
@@ -245,7 +256,7 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('UNHANDLED REJECTION:', reason);
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Open http://localhost:${PORT} in your browser`);
