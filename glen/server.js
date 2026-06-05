@@ -67,15 +67,19 @@ const uploadRoutePhoto = multer({
 const { authenticateToken, authorizeRole } = require('./middleware/auth');
 
 const { generalLimiter } = require('./middleware/rateLimiter');
-const authRoutes = require('./routes/authRoutes');
-const destinationRoutes = require('./routes/destinationRoutes');
-const tourRoutes = require('./routes/tourRoutes');
-const eventRoutes = require('./routes/eventRoutes');
-const bookingRoutes = require('./routes/bookingRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const factRoutes = require('./routes/factRoutes');
-const userTourRoutes = require('./routes/userTourRoutes');
-const routeRoutes = require('./routes/routeRoutes');
+
+// Load routes with error handling
+let authRoutes, destinationRoutes, tourRoutes, eventRoutes, bookingRoutes, reviewRoutes, factRoutes, userTourRoutes, routeRoutes;
+
+try { authRoutes = require('./routes/authRoutes'); } catch (e) { console.error('Failed to load authRoutes:', e.message); authRoutes = (req,res) => res.status(500).json({error: 'auth route error'}); }
+try { destinationRoutes = require('./routes/destinationRoutes'); } catch (e) { console.error('Failed to load destinationRoutes:', e.message); destinationRoutes = (req,res) => res.status(500).json({error: 'destination route error'}); }
+try { tourRoutes = require('./routes/tourRoutes'); } catch (e) { console.error('Failed to load tourRoutes:', e.message); tourRoutes = (req,res) => res.status(500).json({error: 'tour route error'}); }
+try { eventRoutes = require('./routes/eventRoutes'); } catch (e) { console.error('Failed to load eventRoutes:', e.message); eventRoutes = (req,res) => res.status(500).json({error: 'event route error'}); }
+try { bookingRoutes = require('./routes/bookingRoutes'); } catch (e) { console.error('Failed to load bookingRoutes:', e.message); bookingRoutes = (req,res) => res.status(500).json({error: 'booking route error'}); }
+try { reviewRoutes = require('./routes/reviewRoutes'); } catch (e) { console.error('Failed to load reviewRoutes:', e.message); reviewRoutes = (req,res) => res.status(500).json({error: 'review route error'}); }
+try { factRoutes = require('./routes/factRoutes'); } catch (e) { console.error('Failed to load factRoutes:', e.message); factRoutes = (req,res) => res.status(500).json({error: 'fact route error'}); }
+try { userTourRoutes = require('./routes/userTourRoutes'); } catch (e) { console.error('Failed to load userTourRoutes:', e.message); userTourRoutes = (req,res) => res.status(500).json({error: 'userTour route error'}); }
+try { routeRoutes = require('./routes/routeRoutes'); } catch (e) { console.error('Failed to load routeRoutes:', e.message); routeRoutes = (req,res) => res.status(500).json({error: 'route route error'}); }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -98,6 +102,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/фотки', express.static(path.join(__dirname, '..', 'фотки')));
 app.use('/photos', express.static(path.join(__dirname, '..', 'фотки')));
+
+// Health check endpoint (first!)
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString(), port: PORT });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -139,11 +152,6 @@ app.post(
         res.json({ url: `/images/routes/${req.file.filename}` });
     }
 );
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
 
 // Config endpoint for frontend
 app.get('/api/config', (req, res) => {
@@ -227,10 +235,29 @@ try {
 }
 */
 
-app.listen(PORT, () => {
+// Global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});
+
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Open http://localhost:${PORT} in your browser`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
 module.exports = app;
