@@ -5,8 +5,7 @@ meta:
     version: "20"
 
 build:
-  type: docker
-  dockerfile: Dockerfile
+  additionalCommands: npm install
 
 run:
   command: npm run start
