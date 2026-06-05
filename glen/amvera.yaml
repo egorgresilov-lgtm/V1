@@ -1,14 +1,18 @@
----
 meta:
-  environment: node
+  environment: nodejs
   toolchain:
     name: npm
-    version: 18
-
+    version: "20"
 build:
-  additionalCommands: npm install --production
-
+  skip: false
+  additionalCommands: null
+  artifacts:
+    "*": /
 run:
+  persistenceMount: /data
+  scriptName: run.bat
+  scriptArguments: null
+  nodeArguments: null
   command: npm run start
-  containerPort: 3000    # Порт, который слушает Node.js приложение
-  servicePort: 80        # Порт, на который будут приходить внешние запросы
+  containerPort: 80
+  servicePort: 80
