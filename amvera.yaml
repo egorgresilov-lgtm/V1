@@ -3,6 +3,7 @@ meta:
   toolchain:
     name: npm
     version: "20"
+  workingDirectory: glen
 
 build:
   additionalCommands: npm install
